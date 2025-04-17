@@ -1,9 +1,8 @@
 streamlit
 openai
-langchain
+langchain-community  # Remova langchain se não for necessário
 faiss-cpu
 tiktoken
 python-dotenv
 PyPDF2
-langchain-community
-pdfminer.six
+pdfminer.six==20220524  # Tente uma versão específica do pdfminer.six que é mais estável
