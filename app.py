@@ -68,7 +68,9 @@ from langchain.chat_models import ChatOpenAI
 import streamlit as st
 import tempfile
 from PyPDF2 import PdfReader
-
+from langchain.schema import Document
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
 
 # Função para extrair texto do PDF
 def extract_text_from_pdf(pdf_file):
@@ -77,6 +79,12 @@ def extract_text_from_pdf(pdf_file):
     for page in reader.pages:
         text += page.extract_text()
     return text
+
+# Classe para representar os documentos extraídos
+class MyDocument(Document):
+    def __init__(self, content):
+        self.page_content = content
+
 
 
 # Configurar API da OpenAI com secrets
@@ -103,19 +111,26 @@ st.title("Carregue seu arquivo PDF")
 uploaded_file = st.file_uploader("Escolha um arquivo PDF", type=["pdf"])
 
 if uploaded_file is not None:
-    try:
+   try:
         # Lê o conteúdo do PDF
         text = extract_text_from_pdf(uploaded_file)
 
-        # Exibe o conteúdo extraído
+        # Cria documentos para FAISS (formato adequado)
+        docs = [MyDocument(content=text)]
+
+        # Definindo o modelo de embeddings
+        embeddings = OpenAIEmbeddings()
+
+        # Cria o índice FAISS a partir dos documentos
+        db = FAISS.from_documents(docs, embeddings)
+
         st.subheader("Conteúdo do PDF:")
         st.text_area("Texto extraído:", text, height=300)
 
-        # Aqui você pode adicionar mais lógicas, como processamento do texto
-        st.success("Texto extraído com sucesso!")
+        st.success("Texto extraído com sucesso e FAISS indexado!")
 
-    except Exception as e:
-        st.error(f"Ocorreu um erro ao tentar ler o PDF: {e}")
+   except Exception as e:
+        st.error(f"Ocorreu um erro: {e}")
 
 
 
