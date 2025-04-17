@@ -134,7 +134,7 @@ if uploaded_file is not None:
 
 
 
-    docs = text
+    #docs = text
 
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     db = FAISS.from_documents(docs, embeddings)
