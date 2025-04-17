@@ -86,6 +86,11 @@ class MyDocument(Document):
         self.page_content = content
 
 
+# Função para criar documentos para FAISS
+def create_documents(text):
+    # Aqui criamos um objeto de documento para o FAISS
+    return [Document(page_content=text)]
+
 
 # Configurar API da OpenAI com secrets
 api_key = st.secrets["OPENAI_API_KEY"]
@@ -112,22 +117,16 @@ uploaded_file = st.file_uploader("Escolha um arquivo PDF", type=["pdf"])
 
 if uploaded_file is not None:
     try:
-        # Lê o conteúdo do PDF
-        text = extract_text_from_pdf(uploaded_file)
+        pdf_text = extract_text_from_pdf(uploaded_file)
+        st.write("Texto extraído com sucesso!")
 
-        # Cria documentos para FAISS (formato adequado)
-        docs = [MyDocument(content=text)]
+    # Agora criando os documentos
+        docs = create_documents(pdf_text)
 
-        # Definindo o modelo de embeddings
+    # Indexando no FAISS
         embeddings = OpenAIEmbeddings()
-
-        # Cria o índice FAISS a partir dos documentos
         db = FAISS.from_documents(docs, embeddings)
-
-        st.subheader("Conteúdo do PDF:")
-        st.text_area("Texto extraído:", text, height=300)
-
-        st.success("Texto extraído com sucesso e FAISS indexado!")
+        st.write("Documento indexado com sucesso!")
 
     except Exception as e:
         st.error(f"Ocorreu um erro: {e}")
