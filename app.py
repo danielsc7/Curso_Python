@@ -60,6 +60,7 @@
 
 import os
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders.parsers import PDFMinerParser
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
@@ -82,7 +83,7 @@ if uploaded_file is not None:
         tmp_path = tmp_file.name
 
 # Usa o caminho temporário no PyPDFLoader
-    loader = PyPDFLoader(tmp_path)
+    loader = PyPDFLoader(uploaded_file, parser=PDFMinerParser())
     docs = loader.load()
 
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
