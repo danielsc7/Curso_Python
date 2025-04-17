@@ -139,7 +139,7 @@ if uploaded_file is not None:
     #docs = text
     load_dotenv()
 
-    openai_api_key = os.getenv("OPENAI_API_KEY")
+    openai_api_key = "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"
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     db = FAISS.from_documents(docs, embeddings)
 
