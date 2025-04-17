@@ -67,6 +67,17 @@ from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
 import streamlit as st
 import tempfile
+from PyPDF2 import PdfReader
+
+
+# Função para extrair texto do PDF
+def extract_text_from_pdf(pdf_file):
+    reader = PdfReader(pdf_file)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text()
+    return text
+
 
 # Configurar API da OpenAI com secrets
 api_key = st.secrets["OPENAI_API_KEY"]
@@ -75,17 +86,41 @@ api_key = st.secrets["OPENAI_API_KEY"]
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Carregar e indexar documentos
-uploaded_file = st.file_uploader("Carregue seu arquivo PDF", type="pdf")
+# # Carregar e indexar documentos
+# uploaded_file = st.file_uploader("Carregue seu arquivo PDF", type="pdf")
+
+# if uploaded_file is not None:
+#     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+#         tmp_file.write(uploaded_file.read())
+#         tmp_path = tmp_file.name
+
+# # Usa o caminho temporário no PyPDFLoader
+#     loader = PyPDFLoader(tmp_path)#, parser=PDFMinerParser())
+
+#Nova tentativa de carregamento
+# Interface de upload do arquivo PDF
+st.title("Carregue seu arquivo PDF")
+uploaded_file = st.file_uploader("Escolha um arquivo PDF", type=["pdf"])
 
 if uploaded_file is not None:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-        tmp_file.write(uploaded_file.read())
-        tmp_path = tmp_file.name
+    try:
+        # Lê o conteúdo do PDF
+        text = extract_text_from_pdf(uploaded_file)
 
-# Usa o caminho temporário no PyPDFLoader
-    loader = PyPDFLoader(tmp_path)#, parser=PDFMinerParser())
-    docs = loader.load()
+        # Exibe o conteúdo extraído
+        st.subheader("Conteúdo do PDF:")
+        st.text_area("Texto extraído:", text, height=300)
+
+        # Aqui você pode adicionar mais lógicas, como processamento do texto
+        st.success("Texto extraído com sucesso!")
+
+    except Exception as e:
+        st.error(f"Ocorreu um erro ao tentar ler o PDF: {e}")
+
+
+
+
+    docs = text
 
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     db = FAISS.from_documents(docs, embeddings)
