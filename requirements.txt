@@ -5,5 +5,3 @@ faiss-cpu
 tiktoken
 python-dotenv
 PyPDF2
-
-python==3.9
