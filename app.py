@@ -77,13 +77,14 @@ if "messages" not in st.session_state:
 
 # Carregar e indexar documentos
 uploaded_file = st.file_uploader("Carregue seu arquivo PDF", type="pdf")
+
 if uploaded_file is not None:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
         tmp_file.write(uploaded_file.read())
         tmp_path = tmp_file.name
 
 # Usa o caminho temporário no PyPDFLoader
-    loader = PyPDFLoader(uploaded_file, parser=PDFMinerParser())
+    loader = PyPDFLoader(tmp_path, parser=PDFMinerParser())
     docs = loader.load()
 
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
