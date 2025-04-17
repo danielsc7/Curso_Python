@@ -1,5 +1,5 @@
 import os
-import langchain
+#import langchain
 
 from dotenv import load_dotenv
 
