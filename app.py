@@ -111,7 +111,7 @@ st.title("Carregue seu arquivo PDF")
 uploaded_file = st.file_uploader("Escolha um arquivo PDF", type=["pdf"])
 
 if uploaded_file is not None:
-   try:
+    try:
         # Lê o conteúdo do PDF
         text = extract_text_from_pdf(uploaded_file)
 
@@ -129,7 +129,7 @@ if uploaded_file is not None:
 
         st.success("Texto extraído com sucesso e FAISS indexado!")
 
-   except Exception as e:
+    except Exception as e:
         st.error(f"Ocorreu um erro: {e}")
 
 
