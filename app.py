@@ -71,6 +71,8 @@ from PyPDF2 import PdfReader
 from langchain.schema import Document
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
+from dotenv import load_dotenv
+
 
 # Função para extrair texto do PDF
 def extract_text_from_pdf(pdf_file):
@@ -135,7 +137,9 @@ if uploaded_file is not None:
 
 
     #docs = text
+    load_dotenv()
 
+    openai_api_key = os.getenv("OPENAI_API_KEY")
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     db = FAISS.from_documents(docs, embeddings)
 
