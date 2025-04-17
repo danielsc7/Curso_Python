@@ -84,7 +84,7 @@ if uploaded_file is not None:
         tmp_path = tmp_file.name
 
 # Usa o caminho temporário no PyPDFLoader
-    loader = PyPDFLoader(tmp_path, parser=PDFMinerParser())
+    loader = PyPDFLoader(tmp_path)#, parser=PDFMinerParser())
     docs = loader.load()
 
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
