@@ -326,6 +326,7 @@ def create_documents(text):
 
 # Função para usar o FAISS com os embeddings obtidos do Cohere
 def criar_faiss_com_embeddings(docs):
+    load_dotenv()
     CAK = "kIhP09qQgfqxJRlqc8ZJ9jdpQJYSAkCD3yZoYiVo"
     # Usar CohereEmbeddings do LangChain para gerar os embeddings
     embeddings = CohereEmbeddings(cohere_api_key=CAK)
