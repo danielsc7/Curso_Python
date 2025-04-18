@@ -200,15 +200,17 @@
 
 import os
 import cohere
-from langchain.document_loaders import PyPDFLoader
-from langchain.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.embeddings.base import Embeddings
-import streamlit as st
-import tempfile
-from PyPDF2 import PdfReader
-from langchain.schema import Document
 from dotenv import load_dotenv
+from langchain.vectorstores import FAISS
+from langchain.embeddings.base import Embeddings
+from langchain.schema import Document
+from langchain_community.document_loaders import PyPDFLoader
+import streamlit as st
+from PyPDF2 import PdfReader
+import tempfile
+
+# Carregar variáveis de ambiente
+load_dotenv()
 
 # Função para extrair texto do PDF
 def extract_text_from_pdf(pdf_file):
@@ -225,13 +227,15 @@ class MyDocument(Document):
 
 # Função para criar documentos para FAISS
 def create_documents(text):
-    # Aqui criamos um objeto de documento para o FAISS
     return [Document(page_content=text)]
 
 # Função para gerar embeddings usando o Cohere
 def obter_embeddings_com_cohere(textos):
-    cohere_api_key = os.getenv('COHERE_API_KEY')  # Certifique-se de que a chave está no .env
-    client = cohere.Client(cohere_api_key)
+    cohere_api_key = os.getenv("COHERE_API_KEY")  # Carregar chave API do Cohere
+    if not cohere_api_key:
+        raise ValueError("A chave de API do Cohere não está configurada corretamente.")
+    
+    client = cohere.Client(cohere_api_key)  # Inicializa o cliente com a chave
     response = client.embed(texts=textos)
     embeddings = response.embeddings
     return embeddings
@@ -242,37 +246,27 @@ def criar_faiss_com_embeddings(docs):
     db = FAISS.from_documents(docs, embeddings)
     return db
 
-# Configurar a chave de API do Cohere
-load_dotenv()
-
 # Interface de upload do arquivo PDF
 st.title("Carregue seu arquivo PDF")
 uploaded_file = st.file_uploader("Escolha um arquivo PDF", type=["pdf"])
 
 if uploaded_file is not None:
     try:
-        # Extrair o texto do PDF
         pdf_text = extract_text_from_pdf(uploaded_file)
         st.write("Texto extraído com sucesso!")
 
-        # Criando documentos
+        # Criando os documentos
         docs = create_documents(pdf_text)
 
-        # Indexando no FAISS com embeddings do Cohere
+        # Indexando no FAISS
         db = criar_faiss_com_embeddings(docs)
         st.write("Documento indexado com sucesso!")
 
     except Exception as e:
         st.error(f"Ocorreu um erro: {e}")
 
-    # Criar chatbot com RAG usando o Cohere
+    # Criar chatbot com RAG
     retriever = db.as_retriever()
-
-    # Criar instância do modelo de linguagem Cohere
-    llm = cohere.Client(os.getenv('COHERE_API_KEY'))
-    
-    qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
-
     st.title("🤖 Chatbot com RAG")
 
     if "messages" not in st.session_state:
@@ -287,7 +281,7 @@ if uploaded_file is not None:
         st.chat_message("user").write(prompt)
 
         with st.spinner("Consultando..."):
-            response = qa_chain.run(prompt)
+            response = retriever.retrieve(prompt)
 
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.chat_message("assistant").write(response)
