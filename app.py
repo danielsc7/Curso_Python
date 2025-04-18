@@ -232,14 +232,15 @@ def create_documents(text):
 # Função para gerar embeddings usando o Cohere
 def obter_embeddings_com_cohere(textos):
     load_dotenv()
-    cohere_api_key = os.getenv("COHERE_API_KEY")  # Carregar chave API do Cohere
+    #cohere_api_key = os.getenv("COHERE_API_KEY")  # Carregar chave API do Cohere
     
+    CAK = "kIhP09qQgfqxJRlqc8ZJ9jdpQJYSAkCD3yZoYiVo"
 
 
-    if not cohere_api_key:
-        raise ValueError(f"A chave de API do Cohere não está configurada corretamente:{cohere_api_key}" )
+    #if not cohere_api_key:
+   #     raise ValueError(f"A chave de API do Cohere não está configurada corretamente:{cohere_api_key}" )
     
-    client = cohere.Client(cohere_api_key)  # Inicializa o cliente com a chave
+    client = cohere.Client(CAK)#cohere_api_key)  # Inicializa o cliente com a chave
     response = client.embed(texts=textos)
     embeddings = response.embeddings
     return embeddings
