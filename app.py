@@ -353,7 +353,7 @@ if uploaded_file is not None:
         st.write("Documento indexado com sucesso!")
 
     except Exception as e:
-        st.error(f"Ocorreu um erro: {e} {docs}")
+        st.error(f"Ocorreu um erro: {e} {db}")
 
     # Criar o retriever e o modelo para o chatbot
     retriever = db.as_retriever()
