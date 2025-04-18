@@ -305,6 +305,7 @@ from langchain_community.embeddings import CohereEmbeddings  # Usar CohereEmbedd
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
+from langchain.embeddings.base import Embeddings
 import streamlit as st
 import tempfile
 from PyPDF2 import PdfReader
@@ -353,7 +354,7 @@ if uploaded_file is not None:
         st.write("Documento indexado com sucesso!")
 
     except Exception as e:
-        st.error(f"Ocorreu um erro: {e} {db}")
+        st.error(f"Ocorreu um erro: {e}")
 
     # Criar o retriever e o modelo para o chatbot
     retriever = db.as_retriever()
