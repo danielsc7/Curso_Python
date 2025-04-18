@@ -288,11 +288,14 @@
 # else:
 #     st.warning("Por favor, carregue um arquivo PDF.")
 
+
+
+
 import os
 import cohere
 from dotenv import load_dotenv
 from langchain.document_loaders import PyPDFLoader
-from langchain.embeddings.base import Embeddings
+from langchain.embeddings import CohereEmbeddings  # Usar CohereEmbeddings do LangChain
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
@@ -313,20 +316,13 @@ def extract_text_from_pdf(pdf_file):
 def create_documents(text):
     return [Document(page_content=text)]
 
-# Função para gerar embeddings usando o Cohere
-def obter_embeddings_com_cohere(textos):
-    CAK = "kIhP09qQgfqxJRlqc8ZJ9jdpQJYSAkCD3yZoYiVo"
-    client = cohere.Client(CAK)
-    response = client.embed(texts=textos)
-    embeddings = response.embeddings
-    return embeddings
-
 # Função para usar o FAISS com os embeddings obtidos do Cohere
 def criar_faiss_com_embeddings(docs):
-    # Gerar embeddings para cada documento
-    embeddings = obter_embeddings_com_cohere([doc.page_content for doc in docs])
+    CAK = "kIhP09qQgfqxJRlqc8ZJ9jdpQJYSAkCD3yZoYiVo"
+    # Usar CohereEmbeddings do LangChain para gerar os embeddings
+    embeddings = CohereEmbeddings(cohere_api_key=CAK)
     
-    # Certifique-se de que estamos criando o FAISS com os embeddings gerados corretamente
+    # Criar o FAISS usando os documentos e embeddings
     db = FAISS.from_documents(docs, embeddings)
     return db
 
