@@ -198,19 +198,21 @@
 #     st.warning("Por favor, carregue um arquivo PDF.")
 
 
+
+    
+
 import os
 import cohere
 from dotenv import load_dotenv
-from langchain.vectorstores import FAISS
+from langchain.document_loaders import PyPDFLoader
 from langchain.embeddings.base import Embeddings
-from langchain.schema import Document
-from langchain_community.document_loaders import PyPDFLoader
+from langchain.vectorstores import FAISS
+from langchain.chains import RetrievalQA
+from langchain.chat_models import ChatOpenAI
 import streamlit as st
-from PyPDF2 import PdfReader
 import tempfile
-
-# Carregar variáveis de ambiente
-load_dotenv()
+from PyPDF2 import PdfReader
+from langchain.schema import Document
 
 # Função para extrair texto do PDF
 def extract_text_from_pdf(pdf_file):
@@ -220,36 +222,29 @@ def extract_text_from_pdf(pdf_file):
         text += page.extract_text()
     return text
 
-# Classe para representar os documentos extraídos
-class MyDocument(Document):
-    def __init__(self, content):
-        self.page_content = content
-
 # Função para criar documentos para FAISS
 def create_documents(text):
     return [Document(page_content=text)]
 
 # Função para gerar embeddings usando o Cohere
 def obter_embeddings_com_cohere(textos):
-    load_dotenv()
-    #cohere_api_key = os.getenv("COHERE_API_KEY")  # Carregar chave API do Cohere
-    
     CAK = "kIhP09qQgfqxJRlqc8ZJ9jdpQJYSAkCD3yZoYiVo"
-
-
-    #if not cohere_api_key:
-   #     raise ValueError(f"A chave de API do Cohere não está configurada corretamente:{cohere_api_key}" )
-    
-    client = cohere.Client(CAK)#cohere_api_key)  # Inicializa o cliente com a chave
+    client = cohere.Client(CAK)
     response = client.embed(texts=textos)
     embeddings = response.embeddings
     return embeddings
 
 # Função para usar o FAISS com os embeddings obtidos do Cohere
 def criar_faiss_com_embeddings(docs):
+    # Gerar embeddings para cada documento
     embeddings = obter_embeddings_com_cohere([doc.page_content for doc in docs])
+    
+    # Certifique-se de que estamos criando o FAISS com os embeddings gerados corretamente
     db = FAISS.from_documents(docs, embeddings)
     return db
+
+# Carregar variáveis do arquivo .env
+load_dotenv()
 
 # Interface de upload do arquivo PDF
 st.title("Carregue seu arquivo PDF")
@@ -260,23 +255,22 @@ if uploaded_file is not None:
         pdf_text = extract_text_from_pdf(uploaded_file)
         st.write("Texto extraído com sucesso!")
 
-        # Criando os documentos
+        # Criando os documentos para FAISS
         docs = create_documents(pdf_text)
 
-        # Indexando no FAISS
+        # Gerar o FAISS com os embeddings do Cohere
         db = criar_faiss_com_embeddings(docs)
         st.write("Documento indexado com sucesso!")
 
     except Exception as e:
         st.error(f"Ocorreu um erro: {e}")
 
-    # Criar chatbot com RAG
+    # Criar o retriever e o modelo para o chatbot
     retriever = db.as_retriever()
-    st.title("🤖 Chatbot com RAG")
+    llm = ChatOpenAI(temperature=0.2)  # Se estiver usando o OpenAI, caso contrário, substitua com o seu LLM
+    qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
+    # Criar interface no Streamlit
     for msg in st.session_state.messages:
         st.chat_message(msg["role"]).write(msg["content"])
 
@@ -286,7 +280,7 @@ if uploaded_file is not None:
         st.chat_message("user").write(prompt)
 
         with st.spinner("Consultando..."):
-            response = retriever.retrieve(prompt)
+            response = qa_chain.run(prompt)
 
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.chat_message("assistant").write(response)
