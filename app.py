@@ -315,7 +315,8 @@ def create_documents(text):
 
 # Função para gerar embeddings usando o Cohere
 def obter_embeddings_com_cohere(textos):
-    client = cohere.Client(os.getenv("COHERE_API_KEY"))
+    CAK = "kIhP09qQgfqxJRlqc8ZJ9jdpQJYSAkCD3yZoYiVo"
+    client = cohere.Client(CAK)
     response = client.embed(texts=textos)
     embeddings = response.embeddings
     return embeddings
