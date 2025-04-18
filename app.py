@@ -297,8 +297,6 @@
 #     st.warning("Por favor, carregue um arquivo PDF.")
 
 
-
-
 import os
 import cohere
 from dotenv import load_dotenv
@@ -311,6 +309,7 @@ import streamlit as st
 import tempfile
 from PyPDF2 import PdfReader
 from langchain.schema import Document
+load_dotenv()
 
 # Função para extrair texto do PDF
 def extract_text_from_pdf(pdf_file):
